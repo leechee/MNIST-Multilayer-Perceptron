@@ -1,2 +1,2 @@
 # MNIST-Multilayer-Perceptron
-what the dog doin
+![[mnist]](assets/mnist.png)
