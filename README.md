@@ -56,3 +56,12 @@ val_loader = DataLoader(mnist_val, batch_size= 50, shuffle= False)
 train_loader = DataLoader(mnist_train, batch_size= 100, shuffle= False)
 test_loader = DataLoader(mnist_test, batch_size= 50, shuffle= False)
 ```
+
+### Results
+![[results]](assets/fig1.png)
+
+Results after 10 epochs: 
+
+Training Accuracy: 99.376%
+Testing Accuracy: 97.870%
+Validation Accuracy: 97.420%
