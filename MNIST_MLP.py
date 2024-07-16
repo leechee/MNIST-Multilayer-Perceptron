@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
+import numpy as np
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, random_split
 
-# set seed for repoducibility
+# set seed for reproducibility
 torch.manual_seed(19)
 
 # import data
@@ -18,7 +19,7 @@ mnist_test = datasets.MNIST(root= 'data', train = False, download = True, transf
 mnist_train, mnist_val = random_split(mnist_train,[55000,5000])
 
 val_loader = DataLoader(mnist_val, batch_size= 50, shuffle= False)
-train_loader = DataLoader(mnist_train, batch_size= 100, shuffle= False)
+train_loader = DataLoader(mnist_train, batch_size= 50, shuffle= True)
 test_loader = DataLoader(mnist_test, batch_size= 50, shuffle= False)
 
 #making the model
@@ -47,7 +48,7 @@ backpropagation
 update the weights
 '''
 
-def train(neural_network, criterion, optimizer, num_epochs):
+def train(neural_network, criterion, optimizer, num_epochs, train_losses, val_losses, test_losses):
     for epoch in range(num_epochs):
 
         neural_network.train() # sets into test mode
@@ -69,64 +70,76 @@ def train(neural_network, criterion, optimizer, num_epochs):
             pred = output.argmax(dim=1, keepdim=True)
             correct_train += pred.eq(labels.view_as(pred)).sum().item()
 
-        total_train_loss /= len(train_loader.dataset)
-
+        avg_train_loss = total_train_loss / len(train_loader)
+        train_losses[epoch] = avg_train_loss
 
         # validation set ---------------------------------------------------------------------------
 
         neural_network.eval() # sets into eval mode
 
-        total_validation_loss = 0
+        total_val_loss = 0
         correct_val = 0
 
         with torch.no_grad():
             for images, labels in val_loader:
                 output = neural_network(images)
                 loss_val = criterion(output, labels)
-                total_validation_loss += loss_val.item()
+                total_val_loss += loss_val.item()
 
                 #computes each prediction, and then counts how many instances it got right
                 pred = output.argmax(dim=1, keepdim=True)
                 correct_val += pred.eq(labels.view_as(pred)).sum().item()
 
-        total_validation_loss /= len(val_loader.dataset)
+        avg_val_loss = total_val_loss / len(val_loader)
+        val_losses[epoch] = avg_val_loss
 
-        #testing set--------------------------------------------------------------------------------
+        # print out training and validation losses & accuracy at each epoch
+        print(f"Epoch {epoch+1}/{num_epochs} "
+              f"Train Loss: {avg_train_loss:.5f} "
+              f"Train Accuracy: {correct_train / len(train_loader.dataset) * 100:.3f}% "
+              f"Validation Loss: {avg_val_loss:.5f} "
+              f"Validation Accuracy: {correct_val / len(val_loader.dataset) * 100:.3f}%")
+        
+    #testing set--------------------------------------------------------------------------------
+    neural_network.eval()
+    total_test_loss = 0
+    correct_test = 0
 
-        total_test_loss = 0
-        correct_test = 0
+    with torch.no_grad():
+        for images, labels in test_loader:
+            output = neural_network(images)
+            test_loss = criterion(output, labels)
+            total_test_loss += test_loss.item()
 
-        with torch.no_grad():
-            for images, labels in test_loader:
-                output = neural_network(images)
-                test_loss = criterion(output, labels)
-                total_test_loss += test_loss.item()
+            #computes each prediction, and then counts how many instances it got right
+            pred = output.argmax(dim=1, keepdim=True)
+            correct_test += pred.eq(labels.view_as(pred)).sum().item()
 
-                #computes each prediction, and then counts how many instances it got right
-                pred = output.argmax(dim=1, keepdim=True)
-                correct_test += pred.eq(labels.view_as(pred)).sum().item()
+    avg_test_loss = total_test_loss / len(test_loader)
+    test_losses[epoch] = avg_test_loss
 
-        total_test_loss /= len(test_loader.dataset)
-
-        # print out losses at each epoch
-        print(f"Epoch {epoch+1}/{num_epochs} " 
-            f"Train Loss: {total_train_loss:.3f} "
-            f"Validation Loss: {total_validation_loss:.3f} "
-            f"Test Loss: {total_test_loss:.3f}"
-            )
-    
     #print out accuracies at the end
-    print(f"Train Accuracy: {correct_train/len(train_loader.dataset)*100:.3f} " 
-          f"Validation Accuracy: {correct_val/len(val_loader.dataset)*100:.3f} "
-          f"Testing Accuracy: {correct_test/len(test_loader.dataset)*100:.3f}"
-          )
-
+    print(f"Testing Accuracy: {correct_test / len(test_loader.dataset) * 100:.3f}% "
+          f"Test Loss: {avg_test_loss:.5f}")
+    
 #declare model
 learning_rate = 0.001
-num_epochs = 5
+num_epochs = 10
 neural_network = NeuralNetwork()
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(neural_network.parameters(), learning_rate)
 
-train(neural_network, criterion, optimizer, num_epochs)
+
+#initialize error counters for losses and plot over time
+train_losses = np.zeros(num_epochs)
+val_losses = np.zeros(num_epochs)
+test_losses = np.zeros(num_epochs)
+
+#train model
+train(neural_network, criterion, optimizer, num_epochs, train_losses, val_losses, test_losses)
+
+plt.plot(train_losses, label='Train Loss')
+plt.plot(val_losses, label='Val Loss')
+plt.legend()
+plt.show()
