@@ -48,7 +48,7 @@ backpropagation
 update the weights
 '''
 
-def train(neural_network, criterion, optimizer, num_epochs, train_losses, val_losses, test_losses):
+def train_test(neural_network, criterion, optimizer, num_epochs, train_losses, val_losses, test_losses):
     for epoch in range(num_epochs):
 
         neural_network.train() # sets into test mode
@@ -100,7 +100,7 @@ def train(neural_network, criterion, optimizer, num_epochs, train_losses, val_lo
               f"Validation Loss: {avg_val_loss:.5f} "
               f"Validation Accuracy: {correct_val / len(val_loader.dataset) * 100:.3f}%")
         
-    #testing set--------------------------------------------------------------------------------
+#testing set--------------------------------------------------------------------------------
     neural_network.eval()
     total_test_loss = 0
     correct_test = 0
@@ -137,7 +137,7 @@ val_losses = np.zeros(num_epochs)
 test_losses = np.zeros(num_epochs)
 
 #train model
-train(neural_network, criterion, optimizer, num_epochs, train_losses, val_losses, test_losses)
+train_test(neural_network, criterion, optimizer, num_epochs, train_losses, val_losses, test_losses)
 
 plt.plot(train_losses, label='Train Loss')
 plt.plot(val_losses, label='Val Loss')
