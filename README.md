@@ -27,8 +27,6 @@ Now install the necessary AI stack in the venv terminal. These libraries will ai
 ```
 pip install numPy
 pip install matplotlib
-pip install pandas
-pip install scikit-learn
 ```
 
 For Torch:
