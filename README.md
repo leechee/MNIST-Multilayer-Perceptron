@@ -2,7 +2,7 @@
 ![[mnist]](assets/mnist.png)
 
 
-The MNIST database is a large database of handwritten digits that is commonly used for training various image processing systems. It contains 60,000 training images and 10,000 testing images. I am still fixing the validation set for this model.
+The MNIST database is a large database of handwritten digits that is commonly used for training various image processing systems. It contains 60,000 training images and 10,000 testing images.
 
 ## Objective
 
